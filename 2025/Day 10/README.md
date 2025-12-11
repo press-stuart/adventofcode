@@ -26,7 +26,11 @@ Let the number of presses of each button be $x_0, x_1, \dots, x_{N-1}$. The coun
 
 Only buttons $4$ and $5$ increment counter $0$ which has a goal state of $3$. Thus, we have $x_4 + x_5 = 3$.
 
-Let $\mathbf{x} = \begin{bmatrix} x_0 & x_1 & \dots & x_{N-1} \end{bmatrix}^\top$. After constructing the $M$ equations for each counter, we have the matrix equation
+Represent the variables using a vector
+
+$$\mathbf{x} = \begin{bmatrix} x_0 & x_1 & \dots & x_{N-1} \end{bmatrix}^\top.$$
+
+After constructing the $M$ equations for each counter, we have the matrix equation
 
 $$\mathbf{A} \mathbf{x} = \mathbf{b}$$
 
