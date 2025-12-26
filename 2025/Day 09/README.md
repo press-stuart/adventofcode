@@ -22,7 +22,7 @@ A natural way to proceed with Part 2 is still to try every pair of red tiles, bu
 
 ### Introduction: Point in Polygon
 
-Let's first consider an easier problem: [check whether a point lies in the polygon](https://en.wikipedia.org/wiki/Point_in_polygon). It is simple to check whether the point lies on any of the borders, so it remains to check whether the point is inside or outside of the polygon. We can use **ray casting**: a point is inside the polygon if and only if every ray starting from the point and going in any direction intersects (the boundaries of) the polygon an odd number of times. Since the polygon's boundaries are aligned to the rectilinear axes, it suffices to check horizontal and vertical rays.
+Let's first consider an easier problem: [check whether a point lies in the polygon](https://en.wikipedia.org/wiki/Point_in_polygon). We can use **ray casting**: a point is inside the polygon if and only if every ray starting from the point and going in any direction intersects (the boundaries of) the polygon an odd number of times. Since the polygon's boundaries are aligned to the rectilinear axes, it suffices to check horizontal and vertical rays.
 
 Clearly, a rectangle is in the polygon if and only if all points in the rectangle are also in the polygon. We aim to solve the point-in-polygon problem for all points simultaneously.
 
@@ -30,7 +30,9 @@ Clearly, a rectangle is in the polygon if and only if all points in the rectangl
 
 You might ask, *"Aren't the boundaries already given in the input?"* Unfortunately, the input actually gives us the outermost cells of the polygon, which are adjacent to the boundaries (lines/edges) which we are interested in. Moreover, given any two consecutive red tiles (corner cells) in isolation, there are two possible ways to place boundaries, and we specifically want the outward-facing boundary.
 
-Observe that we can *cycle* or *reverse* the list of input points without changing the polygon. To orient ourselves, we can find a reference edge with special properties and move it to the start of the list. Using the positive $(x,y)$-plane with the origin at the bottom-left corner, in my implementation, this reference edge is the **leftmost vertical edge** (smallest $x$-coordinate and aligned to the $y$-axis), oriented **downwards** (the first point has larger $y$-coordinate than the $x$-coordinate). After moving this edge to the start of the list by cycling and/or reversing, we know that the polygon is defined in the counterclockwise (CCW) direction, and the outside of the polygon is on the left of the first edge.
+Observe that we can *cycle* or *reverse* the list of input points without changing the polygon. To orient ourselves, we can find a reference edge with special properties and move it to the start of the list. Using the positive $(x,y)$-plane with the origin at the bottom-left corner, in my implementation, this reference edge is the **leftmost vertical edge** (smallest $x$-coordinate and aligned to the $y$-axis), oriented **downwards** (the first point has larger $y$-coordinate than the second point). If there is a tie, choose any. After moving this edge to the start of the list by cycling and/or reversing, we know that the polygon is defined in the counterclockwise (CCW) direction, and the outside of the polygon is on the left of the first edge.
+
+My solution also implicitly assumes that all input points are corner points, so no three consecutive points on the polygon are collinear. If this were not true, we could eliminate points to make it true.
 
 We process all sets of three consecutive points of the polygon in order. In any step, let the three points be `curr`, `succ`, `suc2`. We find the boundaries adjacent to these cells:
 
@@ -41,7 +43,7 @@ The edge boundaries are given by the boundary direction with respect to the `cur
 
 Next, note that only outward-facing corners have corner boundaries. By the previous definition of orientation, a corner is outward-facing if and only if it is CCW. A CCW corner has two boundaries, one on the `curr`-`succ` boundary direction and the other on the `succ`-`suc2` boundary direction.
 
-While not present in my input, it is possible for two different boundaries to exist on the line between the same two cells. Observe the middle rows in the following example, where only outermost cells are indicated.
+While not present in my input, it is possible for two different boundaries to exist on the line between the same two cells. Observe the middle rows in the following example, where corners are indicated with `#` and other outermost cells are indicated with `X`.
 
 ```
 ........
@@ -62,7 +64,7 @@ Thus, we fill up the 2D Boolean arrays `boundary_x` and `boundary_y`, where `bou
 
 Recall that a cell $(x,y)$ is in the polygon if and only if each of the horizontal and vertical rays starting from the cell intersect the boundaries an odd number of times. We can rewrite the constraint more concretely: there is an odd number of `true` values in `boundary_x[0..x][y]`, as well as in `boundary_y[x][0..y]`. Let the Boolean `valid[x][y]` denote whether $(x,y)$ is in the polygon.
 
-We proceed to handle rectangle-in-polygon queries. Suppose the rectangle is defined by $a \leq x \leq b, c \leq y \leq d$. We could check if all `valid[x][y]` in range are `true`, but that would be slow. Instead, we can gain inspiration from [prefix sums](https://usaco.guide/silver/more-prefix-sums?lang=cpp#2d-prefix-sums) and precompute `p[x][y]`, the number of `true` values in `valid[0..x][0..y]`. For a rectangle query, we use `p` to find the number of `true` values in `valid[a..b][c..d]` which represents the number of cells that are in the rectangle and also in the polygon. Finally, we compare this value against the number of cells in the rectangle $(b-a+1) \times (d-c+1)$.
+We proceed to handle rectangle-in-polygon queries. Suppose the rectangle is defined by $a \leq x \leq b, c \leq y \leq d$. We could directly check if all `valid[x][y]` in range are `true`, but that would be slow. Instead, we can gain inspiration from [prefix sums](https://usaco.guide/silver/more-prefix-sums?lang=cpp#2d-prefix-sums) and precompute `p[x][y]`, the number of `true` values in `valid[0..x][0..y]`. For a rectangle query, we use `p` to find the number of `true` values in `valid[a..b][c..d]` which represents the number of cells that are in the rectangle and also in the polygon. Finally, we compare this value against the number of cells in the rectangle $(b-a+1) \times (d-c+1)$.
 
 ### Coordinate Compression
 
